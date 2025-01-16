@@ -4,6 +4,9 @@ import os
 from werkzeug.utils import secure_filename
 import pymysql.cursors
 from service.text_utils import TextUtils
+from service.user_service import UserService
+import flask
+import flask_login
 
 # Create an instance of the Flask class that is the WSGI application.
 # The first argument is the name of the application module or package,
@@ -12,6 +15,10 @@ app = Flask(__name__)
 
 # Allowed extensions
 ALLOWED_EXTENSIONS = {'pdf', 'docx'}
+app.secret_key = "super secret string"  # Change this!
+
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
 
 # Database connection
 def get_db_connection():
@@ -19,7 +26,7 @@ def get_db_connection():
     connection = pymysql.connect(
         host='localhost',
         user='root',
-        password='Pragna@2001',
+        password='root',
         database='makethon_db',
         cursorclass=pymysql.cursors.DictCursor
     )
@@ -98,30 +105,28 @@ def get_file_content(filename):
             return jsonify({"error": "File not found."}), 404
     finally:
         connection.close()
+        
+userService = UserService()
+
+@login_manager.user_loader
+def user_loader(id):
+    return userService.getUser(id)
 
 @app.route('/auth/login', methods=['POST'])
 def login():
     """User login."""
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+    username = flask.request.form["username"]
+    password = flask.request.form["password"]
 
     if not username or not password:
         return jsonify({"error": "Username and password are required."}), 400
 
-    try:
-        connection = get_db_connection()
-        with connection.cursor() as cursor:
-            query = "SELECT * FROM users WHERE username = %s AND password = %s"
-            cursor.execute(query, (username, password))
-            user = cursor.fetchone()
+    user = userService.getUser(username)
+    if user is None or user.password != password:
+        return jsonify({"error": "Invalid username or password."}), 401
 
-        if user:
-            return jsonify({"message": "Login successful."}), 200
-        else:
-            return jsonify({"error": "Invalid username or password."}), 401
-    finally:
-        connection.close()
+    flask_login.login_user(user)
+    return jsonify({"message": "Login successful."}), 200
 
 @app.route('/auth/signup', methods=['POST'])
 def signup():
@@ -130,20 +135,23 @@ def signup():
     username = data.get('username')
     password = data.get('password')
 
-    if not username or not password:
-        return jsonify({"error": "Username and password are required."}), 400
+    return userService.signup(username, password)
 
-    try:
-        connection = get_db_connection()
-        with connection.cursor() as cursor:
-            query = "INSERT INTO users (username, password) VALUES (%s, %s)"
-            cursor.execute(query, (username, password))
-            connection.commit()
-        return jsonify({"message": "User registered successfully."}), 201
-    except pymysql.IntegrityError:
-        return jsonify({"error": "Username already exists."}), 400
-    finally:
-        connection.close()
+@app.get("/auth/login")
+def login_page():
+    return """<form method=post>
+      Username: <input name="username"><br>
+      Password: <input name="password" type=password><br>
+      <button>Log In</button>
+    </form>"""
+
+@app.route("/protected")
+@flask_login.login_required
+def protected():
+    return flask.render_template_string(
+        "Logged in as: {{ user.id }}",
+        user=flask_login.current_user
+    )
 
 if __name__ == '__main__':
    # Run the app server on localhost:4449

@@ -32,6 +32,7 @@
     <Compile Include="PythonApplication.py" />
     <Compile Include="service\service.py" />
     <Compile Include="service\text_utils.py" />
+    <Compile Include="service\user_service.py" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
@@ -47,6 +48,9 @@
   <ItemGroup>
     <Folder Include="model\" />
     <Folder Include="service\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="model\User.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
