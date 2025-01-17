@@ -1,5 +1,6 @@
 import pymysql.cursors
 from flask import jsonify
+import bcrypt
 
 from model.User import User
 
@@ -17,15 +18,25 @@ class UserService:
         )
         return connection
 
-    def signup(self, username, password):
-        if not username or not password:
-            return jsonify({"error": "Username and password are required."}), 400
+    # Hash the password
+    def hash_password(plain_password):
+        # Generate the salted hash
+        hashed_password = bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt())
+        return hashed_password
 
+    # Verify the password
+    def verify_password(plain_password, hashed_password):
+        # bcrypt automatically extracts the salt from the hashed_password
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+    def signup(self, username, password):
+        # Hash password before saving it to the database
+        hashed_password = UserService.hash_password(password)
+        connection = UserService.get_db_connection()
         try:
-            connection = self.get_db_connection()
             with connection.cursor() as cursor:
                 query = "INSERT INTO users (username, password) VALUES (%s, %s)"
-                cursor.execute(query, (username, password))
+                cursor.execute(query, (username, hashed_password))
                 connection.commit()
 
             return jsonify({"message": "User registered successfully."}), 201

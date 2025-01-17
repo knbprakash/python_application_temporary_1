@@ -122,18 +122,25 @@ def login():
         return jsonify({"error": "Username and password are required."}), 400
 
     user = userService.getUser(username)
-    if user is None or user.password != password:
+    if user is None or not UserService.verify_password(password, user.password):
         return jsonify({"error": "Invalid username or password."}), 401
 
     flask_login.login_user(user)
     return jsonify({"message": "Login successful."}), 200
 
+@app.route("/auth/logout", methods=['POST'])
+def logout():
+    flask_login.logout_user()
+    return "Logged out"
+
 @app.route('/auth/signup', methods=['POST'])
 def signup():
     """User signup."""
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+    username = flask.request.form["username"]
+    password = flask.request.form["password"]
+
+    if not username or not password:
+        return jsonify({"error": "Username and password are required."}), 400
 
     return userService.signup(username, password)
 
