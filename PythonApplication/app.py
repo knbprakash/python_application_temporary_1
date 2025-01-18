@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from service.service import Service
+from service.service import SLAService
 import os
 from werkzeug.utils import secure_filename
 import pymysql.cursors
@@ -65,9 +65,9 @@ def upload_documents():
                 cursor.execute(query, (filename, text))
                 connection.commit()
 
-            response = Service.processDocuments(file)
+            response = SLAService.processDocuments(file)
 
-            return jsonify({"message": "File uploaded and stored successfully.", "filename": filename}), 200
+            return jsonify({"message": "File uploaded and stored successfully.", "response": response}), 200
         except Exception as e:
             return jsonify({"error": str(e)}), 500
         finally:

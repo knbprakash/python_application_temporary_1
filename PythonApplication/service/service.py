@@ -2,7 +2,7 @@ from model.AgreementResponseEnvelopeDto import AgreementResponseEnvelopeDto
 from model.SLAResponseDto import SLAResponseDto
 from werkzeug.datastructures import FileStorage
 
-class Service:
+class SLAService:
     def processDocuments(file: FileStorage):
         sla_1 = SLAResponseDto('SLA 1')
 

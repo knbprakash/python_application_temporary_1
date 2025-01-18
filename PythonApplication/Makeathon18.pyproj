@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Include="app.py" />
     <Compile Include="model\AgreementResponseEnvelopeDto.py" />
+    <Compile Include="model\AssociatedMetrics.py" />
     <Compile Include="model\ErrorResponse.py" />
     <Compile Include="model\SLAResponseDto.py" />
     <Compile Include="PythonApplication.py" />
