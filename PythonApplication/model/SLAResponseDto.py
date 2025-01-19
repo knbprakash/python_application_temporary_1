@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from AssociatedMetrics import AssociatedMetrics
+from model.AssociatedMetrics import AssociatedMetrics
 from typing import Optional
 
 @dataclass

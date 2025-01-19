@@ -39,10 +39,11 @@ def allowed_file(filename):
 @app.route('/documents/upload', methods = ['POST'])
 def upload_documents():
     """Upload a file."""
-    if 'file' not in request.files:
+    if 'files' not in request.files:
         return jsonify({"error": "No file part in the request."}), 400
 
-    file = request.files['file']
+    files = request.files.getlist('files')
+    file = files[0]
     if file.filename == '':
         return jsonify({"error": "No selected file."}), 400
 
