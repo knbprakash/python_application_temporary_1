@@ -31,6 +31,7 @@
     <Compile Include="model\ErrorResponse.py" />
     <Compile Include="model\SLAResponseDto.py" />
     <Compile Include="PythonApplication.py" />
+    <Compile Include="service\file_service.py" />
     <Compile Include="service\service.py" />
     <Compile Include="service\text_utils.py" />
     <Compile Include="service\user_service.py" />

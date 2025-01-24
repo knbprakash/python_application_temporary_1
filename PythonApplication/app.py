@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 import pymysql.cursors
 from service.text_utils import TextUtils
 from service.user_service import UserService
+from service.file_service import FileService
 import flask
 import flask_login
 
@@ -160,6 +161,40 @@ def protected():
         "Logged in as: {{ user.id }}",
         user=flask_login.current_user
     )
+
+@app.post("/agreement/create")
+@flask_login.login_required
+def createAgreement():
+    username = flask_login.current_user.id
+    FileService.createAgreement(username)
+
+    return jsonify(""), 200
+
+@app.get("/agreement")
+@flask_login.login_required
+def getLatestAgreement():
+    username = flask_login.current_user.id
+    return jsonify(FileService.getLatestAgreementId(username)), 200
+
+@app.post("/file/create")
+@flask_login.login_required
+def createFile():
+    username = flask_login.current_user.id
+    latestAgreementId = FileService.getLatestAgreementId(username)
+
+    text = flask.request.json["text"]
+
+    FileService.saveFile(latestAgreementId, text)
+    return jsonify(), 200
+
+@app.get("/file/list")
+@flask_login.login_required
+def getFiles():
+    username = flask_login.current_user.id
+    latestAgreementId = FileService.getLatestAgreementId(username)
+
+    response = FileService.getAllSavedTextsByAgreementId(latestAgreementId)
+    return jsonify(response), 200
 
 if __name__ == '__main__':
    # Run the app server on localhost:4449
